@@ -1,0 +1,44 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+contract GasOptimizedBase {
+    address public owner;
+    uint256 public count;
+
+    error NotOwner();
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    modifier onlyOwner() {
+        if (msg.sender != owner) revert NotOwner();
+        _;
+    }
+
+    // cheaper than storing long strings repeatedly
+    event CountUpdated(uint256 newCount);
+
+    function increment() external {
+        unchecked {
+            count++;
+        }
+        emit CountUpdated(count);
+    }
+
+    function incrementBy(uint256 amount) external {
+        unchecked {
+            count += amount;
+        }
+        emit CountUpdated(count);
+    }
+
+    function resetCount() external onlyOwner {
+        count = 0;
+        emit CountUpdated(0);
+    }
+
+    function transferOwnership(address newOwner) external onlyOwner {
+        owner = newOwner;
+    }
+}
